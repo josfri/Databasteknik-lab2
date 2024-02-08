@@ -75,7 +75,7 @@ INSERT INTO performances (theater_name, start_time, date, imdb) VALUES
 ('Grand Stockholm', '19:00', '2023-04-13', 'tt0468569'),
 ('Rigoletto', '21:00', '2023-04-14', 'tt0110912'),
 ('Rigoletto', '16:00', '2023-04-15', 'tt0109830'),
-('Grand Stockholm', '14:00', '2023-04-16', 'tt0133093');
+('Grand Stockholm', '14:00', '2023-04-16', 'tt0133093'),
 ('Grand Stockholm', '15:00', '2023-04-17', 'tt1375666'),
 ('Sergel', '17:00', '2023-04-17', 'tt0068646'),
 ('Rigoletto', '19:00', '2023-04-17', 'tt0816692'),
@@ -99,8 +99,8 @@ INSERT INTO performances (theater_name, start_time, date, imdb) VALUES
 
 
 INSERT INTO customers (username, full_name, password) VALUES
-('Fabian', 'Fabian Rosen', 'qwerty'56789),
-('josfri, 'Josefine Frid', 'password5'),
+('Fabian', 'Fabian Rosen', 'qwerty56789'),
+('josfri', 'Josefine Frid', 'password5'),
 ('Fremja', 'Fremja Ekre', 'qwertyuio9'),
 ('leoDicap', 'Leonardo DiCaprio', 'oscars2023'),
 ('beyKnow', 'Beyonce Knowles', 'lemonade'),
@@ -125,5 +125,5 @@ INSERT INTO tickets (username, performance_id) VALUES
 ('emmaStone', (SELECT performance_id FROM performances LIMIT 3 OFFSET 2)),
 ('johnnyDepp', (SELECT performance_id FROM performances LIMIT 3 OFFSET 2)),
 ('jenAni', (SELECT performance_id FROM performances LIMIT 3 OFFSET 2)),
-('leoDicap', (SELECT performance_id FROM performances LIMIT 3 OFFSET 2)),
+('leoDicap', (SELECT performance_id FROM performances LIMIT 3 OFFSET 2));
 
