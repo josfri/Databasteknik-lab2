@@ -45,7 +45,7 @@ CREATE TABLE performances (
 );
 
 CREATE TABLE tickets (
-    ticket_id TEXT DEFAULT randomblob(16),
+    ticket_id TEXT DEFAULT (lower(hex(randomblob(16)))),
     username TEXT,
     performance_id TEXT,
     PRIMARY KEY (ticket_id),
