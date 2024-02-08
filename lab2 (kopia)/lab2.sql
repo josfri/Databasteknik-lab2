@@ -34,7 +34,7 @@ CREATE TABLE theaters (
 );
 
 CREATE TABLE performances (
-    performance_id TEXT DEFAULT randomblob(16),
+    performance_id TEXT DEFAULT (lower(hex(randomblob(16)))),
     theater_name TEXT,
     start_time TIME,
     date DATE,
