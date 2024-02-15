@@ -33,16 +33,30 @@ CREATE TABLE theaters (
     PRIMARY KEY (theater)
 );
 
+
+
+-- CREATE TABLE performances (
+--     performanceId TEXT DEFAULT (lower(hex(randomblob(16)))),
+--     theater TEXT,
+--     time TIME,
+--     date DATE,
+--     imdbKey TEXT,
+--     PRIMARY KEY (performanceId),
+--     FOREIGN KEY (imdbKey) REFERENCES movies(imdbKey)
+--     FOREIGN KEY (theater) REFERENCES theaters(theater)
+-- );
+
 CREATE TABLE performances (
     performanceId TEXT DEFAULT (lower(hex(randomblob(16)))),
-    theater TEXT,
-    time TIME,
-    date DATE,
     imdbKey TEXT,
+    theater TEXT,
+    date DATE,
+    time TIME,
     PRIMARY KEY (performanceId),
     FOREIGN KEY (imdbKey) REFERENCES movies(imdbKey)
     FOREIGN KEY (theater) REFERENCES theaters(theater)
 );
+
 
 CREATE TABLE tickets (
     ticket_id TEXT DEFAULT (lower(hex(randomblob(16)))),

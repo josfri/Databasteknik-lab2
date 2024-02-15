@@ -4,7 +4,7 @@ import sqlite3
 
 # Set-up
 PORT = 7007
-# sqlite3 lab3.sqlite < /Users/josefinefrid/Desktop/Databasteknik/lab3/lab3.sql
+# sqlite3 lab3.sqlite < lab3.sql
 db = sqlite3.connect("../lab3.sqlite")
 db.execute("PRAGMA foreign_keys = ON")
 
@@ -71,7 +71,7 @@ def insert_user():
             db.commit()
             response.status = 201
             username, = found
-            return f"http://localhost:{PORT}/{username}"
+            return f"users/{username}"
     except sqlite3.IntegrityError:
         response.status = 409
         return "User id already in use"
@@ -121,12 +121,13 @@ def insert_performances():
         c.execute(
             """
             INSERT
-            INTO   performances( performance_id, imdbKey, date, time, theater)
-            VALUES (?,?,?)
-            RETURNING  performance_id
+            INTO   performances(imdbKey, theater, date, time)
+            VALUES (?,?,?,?)
+            RETURNING  performanceId
             """,
-            [ newperformance['title'], newperformance['year'], newperformance['imdbKey'], newperformance['theater']]
+            [ newperformance['imdbKey'], newperformance['theater'], newperformance['date'], newperformance['time']]
         )
+        print("hej")
         found = c.fetchone()
         if not found:
             response.status = 400
@@ -134,8 +135,8 @@ def insert_performances():
         else:
             db.commit()
             response.status = 201
-            username, = found
-            return f"http://localhost:{PORT}/{performance_id}"
+            #username = found
+            return f"http://localhost:{PORT}/"
     except sqlite3.IntegrityError:
         response.status = 409
         return "Performance is already in use"
