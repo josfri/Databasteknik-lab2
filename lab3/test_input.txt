@@ -1,0 +1,57 @@
+curl -X GET http://localhost:7007/ping
+                                                                                                                                              
+curl -X POST http://localhost:7007/reset
+
+curl -X POST http://localhost:7007/users -H "Content-Type: application/json" -d '{
+    "username": "alice",
+    "fullName": "Alice Lidell",
+    "pwd": "aliceswaytoosimplepassword"
+}'
+                                                                                                                                        
+curl -X POST http://localhost:7007/movies -H "Content-Type: application/json" -d '{
+    "imdbKey": "tt4975722",
+    "title": "Moonlight",
+    "year": 2016
+}'
+                                                                                                                                 
+curl -X POST http://localhost:7007/performances -H "Content-Type: application/json" -d '{
+     "imdbKey": "tt4975722",
+     "theater": "Kino",
+     "date": "2021-02-22",
+     "time": "19:00"
+}'
+
+curl -X GET http://localhost:7007/movies
+
+
+curl -X POST http://localhost:7007/movies -H "Content-Type: application/json" -d '{
+            "imdbKey": "tt1895587",
+            "title": "Spotlight",
+            "year": 2015
+        }'
+
+curl -X POST http://localhost:7007/movies -H "Content-Type: application/json" -d '{
+            "imdbKey": "tt2562232",
+            "title": "Birdman",
+            "year": 2014
+        }'
+
+
+curl -X GET http://localhost:7007/movies/tt2562232
+
+curl -X POST http://localhost:7007/performances -H "Content-Type: application/json" -d '{
+     "imdbKey": "tt2562232",
+     "theater": "Kino",
+     "date": "2021-02-22",
+     "time": "19:00"
+}'
+
+curl -X POST http://localhost:7007/performances -H "Content-Type: application/json" -d '{
+     "imdbKey": "tt2562232",
+     "theater": "Kino",
+     "date": "2021-02-23",
+     "time": "19:00"
+}'
+
+curl -X GET http://localhost:7007/performances
+

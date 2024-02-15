@@ -71,7 +71,7 @@ def insert_user():
             db.commit()
             response.status = 201
             username, = found
-            return f"users/{username}"
+            return f"/users/{username}"
     except sqlite3.IntegrityError:
         response.status = 409
         return "User id already in use"
@@ -89,11 +89,11 @@ def insert_movie():
         c.execute(
             """
             INSERT
-            INTO   movies(title, year, imdbKey)
+            INTO   movies(imdbKey, title, year)
             VALUES (?,?,?)
-            RETURNING  imdb
+            RETURNING imdbKey
             """,
-            [newmovie['title'], newmovie['year'], newmovie['imdbKey']]
+            [newmovie['imdbKey'], newmovie['title'], newmovie['year']]
         )
         found = c.fetchone()
         if not found:
@@ -102,8 +102,8 @@ def insert_movie():
         else:
             db.commit()
             response.status = 201
-            username, = found
-            return f"http://localhost:{PORT}/{username}"
+            imdbKey, = found
+            return f"/movies/{imdbKey}"
     except sqlite3.IntegrityError:
         response.status = 409
         return "Movie is already in use"
@@ -135,16 +135,138 @@ def insert_performances():
         else:
             db.commit()
             response.status = 201
-            #username = found
-            return f"http://localhost:{PORT}/"
+            performanceId, = found
+            return f"/performances/{performanceId}"
     except sqlite3.IntegrityError:
         response.status = 409
         return "Performance is already in use"
-       
 
+@get('/movies')
+def get_movies():
+    c = db.cursor()
+    c.execute(
+        """
+        SELECT   imdbKey, title, year
+        FROM     movies
+        """
+    )
+    response.status = 200
+    found = [{"imdbKey": imdbKey,
+              "title": title,
+              "year": year } for imdbKey, title, year in c]
+    return {"data": found}
 
+@get('/movies/<imdb_key>')
+def get_movies_imdb(imdb_key):
+    c = db.cursor()
+    
+    c.execute(
+        """
+        SELECT   imdbKey, title, year
+        FROM     movies
+        WHERE    imdbKey = ?
+        """,
+        [imdb_key]
+    )
+    found = [{"imdbKey": imdbKey,
+                "title": title,
+                "year": year } for imdbKey, title, year in c]
+    if not found:
+        response.status = 400
+        return ""
+    if len(found) == 0:
+        response.status = 404
+        return ""
+    return {"data": found}
+    
+    
 
+@get('/performances')
+def getPerformances():
+    c = db.cursor()
+    c.execute(
+        """
+        SELECT performanceId, imdbKey, theater, date, time, year, title
+        FROM performances JOIN movies USING (imdbKey)
+        """
+    )
+    response.status = 200
+    found = [{"performaceId": performanceId, 
+             "date": date,
+            "startTime": time,
+            "title": title,
+            "year": year,
+            "theater": theater,
+              } for performanceId, imdbKey, theater, date, time, year, title in c]
+    return {"data": found}
 
+@post('/tickets')
+def insert_ticket():
+    newticket = request.json
 
+    c = db.cursor()
+
+    #Find customer?
+    c.execute(
+        """
+        SELECT      username, pwd
+        FROM        customers
+        WHERE       username = ? AND pwd = ?
+        """,
+        [newticket['username'], hash(newticket['pwd'])]
+    )
+    
+    found = c.fetchone()
+    if not found:
+        response.status = 401
+        return "User not found"
+
+    ##Find performance?
+    c.execute(
+    """
+    SELECT      performanceId
+    FROM        performances
+    WHERE       performanceId = ?
+    """,
+    [newticket['performanceId']]
+    )
+    found = c.fetchone()
+    if not found:
+        response.status = 400
+        return "Performance was not found"
+    
+    #fins number of sold ticket and the capacity:
+    c.execute(
+         """
+         WITH soldtickets(performanceId, numberoftickets) AS (
+         SELECT performanceId, count()
+         FROM tickets 
+         WHERE performanceId = ?
+         )
+
+         SELECT capacity - numberoftickets
+         FROM theaters 
+         JOIN performances USING (theater)
+         JOIN soldtickets USING (performanceId)
+        """,
+        [newticket['performanceId']]
+    )
+    #checking if there are any left
+    remaining_tickets, = c.fetchone()
+    if remaining_tickets < 1:
+                response.status = 400
+                return 'Tickets sold out'
+    else:
+        c.execute(
+            """
+            INSERT
+            INTO       tickets (username, performanceId)
+            VALUES     (?, ?)
+            RETURNING  ticketId
+            """,
+            [newticket['username'], newticket['performanceId']]
+        )
+        ticket_id, = c.fetchone()
+        return f"/tickets/{ticket_id}"
 
 run(host='localhost', port=PORT)
