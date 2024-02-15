@@ -59,10 +59,10 @@ CREATE TABLE performances (
 
 
 CREATE TABLE tickets (
-    ticket_id TEXT DEFAULT (lower(hex(randomblob(16)))),
+    ticketId TEXT DEFAULT (lower(hex(randomblob(16)))),
     username TEXT,
     performanceId TEXT,
-    PRIMARY KEY (ticket_id),
+    PRIMARY KEY (ticketId),
     FOREIGN KEY (username) REFERENCES customers(username)
     FOREIGN KEY (performanceId) REFERENCES performances(performanceId)
 );

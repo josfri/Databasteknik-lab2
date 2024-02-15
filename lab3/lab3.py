@@ -168,16 +168,24 @@ def get_movies_imdb(imdb_key):
         """,
         [imdb_key]
     )
+
     found = [{"imdbKey": imdbKey,
                 "title": title,
                 "year": year } for imdbKey, title, year in c]
     if not found:
-        response.status = 400
-        return ""
+        response.status = 404
+        return []
     if len(found) == 0:
         response.status = 404
-        return ""
+        return []
     return {"data": found}
+
+    #     movies = c.fetchall()  # Use fetchall to get all results
+    # if not movies:  # If movies list is empty, no movie was found
+    #     response.status = 404  # Set the response status to 404 Not Found
+    #     return {"error": "Movie not found"}  # Return a JSON indicating the error
+    # found = [{"imdbKey": row[0], "title": row[1], "year": row[2]} for row in movies]
+    # return {found}  # Return found movies as a JSON response
     
     
 
@@ -241,13 +249,14 @@ def insert_ticket():
          WITH soldtickets(performanceId, numberoftickets) AS (
          SELECT performanceId, count()
          FROM tickets 
-         WHERE performanceId = ?
+         GROUP BY performanceId
          )
 
-         SELECT capacity - numberoftickets
-         FROM theaters 
-         JOIN performances USING (theater)
-         JOIN soldtickets USING (performanceId)
+         SELECT capacity - coalesce(numberoftickets,0)
+         FROM performances 
+         JOIN theaters USING (theater)
+         LEFT OUTER JOIN soldtickets USING (performanceId)
+         WHERE performanceId = ?
         """,
         [newticket['performanceId']]
     )
@@ -266,7 +275,7 @@ def insert_ticket():
             """,
             [newticket['username'], newticket['performanceId']]
         )
-        ticket_id, = c.fetchone()
+        ticket_id, = found
         return f"/tickets/{ticket_id}"
 
 run(host='localhost', port=PORT)
