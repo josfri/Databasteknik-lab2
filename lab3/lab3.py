@@ -5,7 +5,7 @@ import sqlite3
 # Set-up
 PORT = 7007
 # sqlite3 lab3.sqlite < /Users/josefinefrid/Desktop/Databasteknik/lab3/lab3.sql
-db = sqlite3.connect("lab3/lab3.sqlite")
+db = sqlite3.connect("../lab3.sqlite")
 db.execute("PRAGMA foreign_keys = ON")
 
 #kryptering: 
@@ -35,7 +35,7 @@ def reset():
         PRAGMA foreign_keys = ON;
 
         INSERT
-        INTO    theaters(theater_name, capacity)
+        INTO    theaters(theater, capacity)
         VALUES  ('Kino', 10),
                 ('Regal', 16),
                 ('Skandia', 100)
@@ -57,7 +57,7 @@ def insert_user():
         c.execute(
             """
             INSERT
-            INTO   customer(username, full_name, password)
+            INTO   customers(username, fullName, pwd)
             VALUES (?,?,?)
             RETURNING  username
             """,
@@ -75,8 +75,6 @@ def insert_user():
     except sqlite3.IntegrityError:
         response.status = 409
         return "User id already in use"
-
-
 
 
 

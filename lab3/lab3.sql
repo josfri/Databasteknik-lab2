@@ -15,40 +15,40 @@ PRAGMA foreign_keys = ON;
 CREATE TABLE movies (
     title TEXT,
     year INT,
-    imdb TEXT,
+    imdbKey TEXT,
     run_time INT,
-    PRIMARY KEY (imdb)
+    PRIMARY KEY (imdbKey)
 );
 
 CREATE TABLE customers (
     username TEXT,
-    full_name TEXT,
-    password TEXT,
+    fullName TEXT,
+    pwd TEXT,
     PRIMARY KEY (username)
 );
 
 CREATE TABLE theaters (
-    theater_name TEXT,
+    theater TEXT,
     capacity INT,
-    PRIMARY KEY (theater_name)
+    PRIMARY KEY (theater)
 );
 
 CREATE TABLE performances (
-    performance_id TEXT DEFAULT (lower(hex(randomblob(16)))),
-    theater_name TEXT,
-    start_time TIME,
+    performanceId TEXT DEFAULT (lower(hex(randomblob(16)))),
+    theater TEXT,
+    time TIME,
     date DATE,
-    imdb TEXT,
-    PRIMARY KEY (performance_id),
-    FOREIGN KEY (imdb) REFERENCES movies(imdb)
-    FOREIGN KEY (theater_name) REFERENCES theaters(theater_name)
+    imdbKey TEXT,
+    PRIMARY KEY (performanceId),
+    FOREIGN KEY (imdbKey) REFERENCES movies(imdbKey)
+    FOREIGN KEY (theater) REFERENCES theaters(theater)
 );
 
 CREATE TABLE tickets (
     ticket_id TEXT DEFAULT (lower(hex(randomblob(16)))),
     username TEXT,
-    performance_id TEXT,
+    performanceId TEXT,
     PRIMARY KEY (ticket_id),
     FOREIGN KEY (username) REFERENCES customers(username)
-    FOREIGN KEY (performance_id) REFERENCES performances(performance_id)
+    FOREIGN KEY (performanceId) REFERENCES performances(performanceId)
 );
