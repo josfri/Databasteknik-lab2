@@ -76,6 +76,72 @@ def insert_user():
         response.status = 409
         return "User id already in use"
 
+@post('/movies')
+def insert_movie(): 
+    newmovie = request.json; 
+#behövs den här? 
+    if not newmovie or 'imdbKey' not in newmovie or 'title' not in newmovie or 'year' not in newmovie:
+        response.status = 400
+        return ' '
+      
+    c = db.cursor()
+    try:
+        c.execute(
+            """
+            INSERT
+            INTO   movies(title, year, imdbKey)
+            VALUES (?,?,?)
+            RETURNING  imdb
+            """,
+            [newmovie['title'], newmovie['year'], newmovie['imdbKey']]
+        )
+        found = c.fetchone()
+        if not found:
+            response.status = 400
+            return "Illegal..."
+        else:
+            db.commit()
+            response.status = 201
+            username, = found
+            return f"http://localhost:{PORT}/{username}"
+    except sqlite3.IntegrityError:
+        response.status = 409
+        return "Movie is already in use"
+    
+@post('/performances')
+def insert_performances(): 
+    newperformance = request.json; 
+#behövs den här? 
+    if not newperformance or 'imdbKey' not in newperformance or 'date' not in newperformance or 'time' not in newperformance or 'theater' not in newperformance:
+        response.status = 400
+        return ' '
+      
+    c = db.cursor()
+    try:
+        c.execute(
+            """
+            INSERT
+            INTO   performances( performance_id, imdbKey, date, time, theater)
+            VALUES (?,?,?)
+            RETURNING  performance_id
+            """,
+            [ newperformance['title'], newperformance['year'], newperformance['imdbKey'], newperformance['theater']]
+        )
+        found = c.fetchone()
+        if not found:
+            response.status = 400
+            return "Illegal..."
+        else:
+            db.commit()
+            response.status = 201
+            username, = found
+            return f"http://localhost:{PORT}/{username}"
+    except sqlite3.IntegrityError:
+        response.status = 409
+        return "Movie is already in use"
+       
+
+
 
 
 
