@@ -58,5 +58,5 @@ curl -X GET http://localhost:7007/performances
 curl -X POST http://localhost:7007/tickets -H "Content-Type: application/json" -d '{
      "username": "alice",
      "pwd": "aliceswaytoosimplepassword",
-     "performanceId": "5c70a311cbf15c21568b2bcb4f91b7e5"
+     "performanceId": "062f088c6b3cffed7e571d485965655a"
 }'

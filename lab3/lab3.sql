@@ -50,6 +50,22 @@ CREATE TABLE tickets (
     username TEXT,
     performanceId TEXT,
     PRIMARY KEY (ticketId),
-    FOREIGN KEY (username) REFERENCES customers(username)
+    FOREIGN KEY (username) REFERENCES customers(username),
     FOREIGN KEY (performanceId) REFERENCES performances(performanceId)
 );
+
+DROP TRIGGER IF EXISTS tickets_left;
+CREATE TRIGGER tickets_left
+BEFORE INSERT ON tickets
+WHEN
+  (
+  SELECT coalesce(count(ticketId), 0) AS sold_tickets
+            FROM performances
+            LEFT OUTER JOIN tickets USING (performanceId)
+            JOIN theaters USING (theater)
+            GROUP BY performanceId
+            HAVING sold_tickets < capacity AND performanceId = NEW.performanceId
+)
+BEGIN
+  SELECT RAISE (ROLLBACK, "No tickets left");
+END;

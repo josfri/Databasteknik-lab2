@@ -242,29 +242,7 @@ def insert_ticket():
         response.status = 400
         return "Performance was not found"
     
-    #fins number of sold ticket and the capacity:
-    c.execute(
-         """
-         WITH soldtickets(performanceId, numberoftickets) AS (
-         SELECT performanceId, count()
-         FROM tickets 
-         GROUP BY performanceId
-         )
-
-         SELECT capacity - coalesce(numberoftickets,0)
-         FROM performances 
-         JOIN theaters USING (theater)
-         LEFT OUTER JOIN soldtickets USING (performanceId)
-         WHERE performanceId = ?
-        """,
-        [newticket['performanceId']]
-    )
-    #checking if there are any left
-    remaining_tickets, = c.fetchone()
-    if remaining_tickets < 1:
-                response.status = 400
-                return 'Tickets sold out'
-    else:
+    try:
         c.execute(
             """
             INSERT
@@ -274,10 +252,53 @@ def insert_ticket():
             """,
             [newticket['username'], newticket['performanceId']]
         )
+
         found = c.fetchone()
-        db.commit()
         response.status = 201
-        ticketId, = found
-        return f"/tickets/{ticketId}"
+
+        c.execute(
+        """
+        SELECT      ticketId
+        FROM        tickets
+        """
+        )
+        found = c.fetchone()
+        return f"/tickets/{found}"
+    except Exception as e:
+        response.status = 404
+        return "No tickets left"
+    
+@get('/users/<username>/tickets')
+def get_user_tickets(username):
+    c = db.cursor()
+    c.execute(
+        """
+        SELECT   
+            date,
+            time,
+            title,
+            year,
+            theater,
+            count() AS nbr_tickets
+        FROM     tickets
+        LEFT JOIN performances
+        USING (performanceId)
+        LEFT JOIN movies
+        USING (imdb)
+        WHERE username = ?
+        GROUP BY performanceId
+        """,
+    [username]
+    )
+    found = [{
+         "date": date,
+            "startTime": time,
+            "theater": theater,
+            "title": title,
+            "year": year,
+            "nbrOfTickets": nbr_tickets}
+             for date, time, theater, title, year, nbr_tickets  in c]
+    response.status = 201
+    return {"data": found}
 
 run(host='localhost', port=PORT)
