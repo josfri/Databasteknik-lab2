@@ -62,4 +62,18 @@ BEGIN
     SELECT RAISE(ABORT, 'No available seats!');
 END;
 
-CREATE TRIGGER decrement_seats AFTER INSERT ON tic
+CREATE TRIGGER decrement_seats AFTER INSERT ON tickets
+BEGIN
+    UPDATE performances
+    SET
+        availableSeats = availableSeats - 1
+    WHERE performanceId = new.performanceId;
+END;
+
+CREATE TRIGGER increment_seats AFTER DELETE ON tickets
+BEGIN
+    UPDATE performances
+    SET 
+            availableSeats = availableSeats + 1
+    WHERE   performanceId = old.performanceId;
+END;

@@ -307,6 +307,7 @@ def post_ticket():
 
     ## All checks has passed, now insert ticket
     try:
+        print("innan")
         c.execute(
             """
             INSERT
@@ -320,7 +321,7 @@ def post_ticket():
         found = c.fetchone()
 
         response.status = 201
-        print("stop2")
+        print("stop2")  
         c.execute(
         """
         SELECT      ticketId
