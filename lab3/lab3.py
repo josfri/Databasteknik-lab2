@@ -5,8 +5,24 @@ import sqlite3
 # Set-up
 PORT = 7007
 # sqlite3 lab3.sqlite < lab3.sql
-db = sqlite3.connect("../lab3.sqlite")
+db = sqlite3.connect("/Users/josefinefrid/Desktop/Databasteknik/lab2/Databasteknik-lab2/lab3/lab3.sqlite")
 db.execute("PRAGMA foreign_keys = ON")
+
+def get_theatre_capacity(theatre_name):
+    c = db.cursor()
+    c.execute(
+    """
+    SELECT capacity
+    FROM theaters
+    WHERE theater = ?
+    """,
+    (theatre_name,)
+    )
+    result = c.fetchone()
+    if result is None:
+        return None
+    else:
+        return result[0]
 
 #kryptering: 
 def hash(msg):
@@ -109,24 +125,34 @@ def insert_movie():
         return "Movie is already in use"
     
 @post('/performances')
+
+
 def insert_performances(): 
     newperformance = request.json; 
 #behövs den här? 
     if not newperformance or 'imdbKey' not in newperformance or 'date' not in newperformance or 'time' not in newperformance or 'theater' not in newperformance:
         response.status = 400
         return ' '
+    
+    capacity = get_theatre_capacity(newperformance['theater'])
+    
+    if capacity is None:
+        response.status = 400
+        return "Theater does not exist" # Or any appropriate error message
       
     c = db.cursor()
     try:
         c.execute(
             """
             INSERT
-            INTO   performances(imdbKey, theater, date, time)
-            VALUES (?,?,?,?)
+            INTO   performances(imdbKey, theater, date, time, remainingSeats)
+            VALUES (?,?,?,?,?)
             RETURNING  performanceId
             """,
-            [newperformance['imdbKey'], newperformance['theater'], newperformance['date'], newperformance['time']]
+            [newperformance['imdbKey'], newperformance['theater'], newperformance['date'], newperformance['time'], capacity]
         )
+
+
         found = c.fetchone()
         if not found:
             response.status = 400
@@ -158,26 +184,26 @@ def get_movies():
 @get('/movies/<imdb_key>')
 def get_movies_imdb(imdb_key):
     c = db.cursor()
-    
-    c.execute(
-        """
-        SELECT   imdbKey, title, year
-        FROM     movies
-        WHERE    imdbKey = ?
-        """,
-        [imdb_key]
-    )
+    try:
+        c.execute(
+            """
+            SELECT   imdbKey, title, year
+            FROM     movies
+            WHERE    imdbKey = ?
+            """,
+            [imdb_key]
+        )
 
-    found = [{"imdbKey": imdbKey,
-                "title": title,
-                "year": year } for imdbKey, title, year in c]
-    if not found:
-        response.status = 404
-        return []
-    if len(found) == 0:
-        response.status = 404
-        return []
-    return {"data": found}
+        found = [{"imdbKey": imdbKey,
+                    "title": title,
+                    "year": year } for imdbKey, title, year in c]
+        if len(found) == 0:
+            response.status = 400
+        return {"data": found}
+    except Exception as e:
+        response.status = 400
+        return "Not valid imdbkey"
+    
 
     #     movies = c.fetchall()  # Use fetchall to get all results
     # if not movies:  # If movies list is empty, no movie was found
@@ -193,12 +219,12 @@ def getPerformances():
     c = db.cursor()
     c.execute(
         """
-        SELECT performanceId, imdbKey, theater, date, time, year, title, availableSeats
+        SELECT performanceId, imdbKey, theater, date, time, year, title
         FROM performances JOIN movies USING (imdbKey)
         """
     )
     response.status = 200
-    found = [{"performaceId": performanceId, 
+    found = [{"performanceId": performanceId, 
              "date": date,
             "startTime": time,
             "title": title,
@@ -307,28 +333,24 @@ def post_ticket():
 
     ## All checks has passed, now insert ticket
     try:
-        print("innan")
         c.execute(
             """
             INSERT
-            INTO       tickets(username, performanceId)
-            VALUES     (?, ?)
+            INTO   tickets(username, performanceId) 
+            VALUES (?, ?)
             RETURNING  ticketId
             """,
             [ticket['username'], ticket['performanceId']]
         )
-        print("stop1")
         found = c.fetchone()
 
-        response.status = 201
-        print("stop2")  
+        response.status = 201  
         c.execute(
         """
         SELECT      ticketId
         FROM        tickets
         """
         )
-        print("stop3")
         
         return f"/tickets/{found[0]}"
     except Exception as e:
@@ -344,15 +366,15 @@ def get_user_tickets(username):
         SELECT   
             date,
             time,
+            theater,
             title,
             year,
-            theater,
             count() AS nbr_tickets
         FROM     tickets
         LEFT JOIN performances
         USING (performanceId)
         LEFT JOIN movies
-        USING (imdb)
+        USING (imdbKey)
         WHERE username = ?
         GROUP BY performanceId
         """,

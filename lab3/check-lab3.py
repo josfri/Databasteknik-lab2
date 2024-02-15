@@ -218,13 +218,19 @@ def check_get_performances(actual_performances):
     check("GET", resource)
     try:
         r = requests.get(resource)
+        print("1")
         returned_performances = response_to_dicts(r)
         expected = set(actual_performances)
+        print("2")
         found = set(performance['performanceId'] for performance in returned_performances)
+        print("3")
         require(found, expected)
+        print("4")
         for p in returned_performances:
             theater = p["theater"]
+            print("5")
             remaining_seats = p["remainingSeats"]
+            print("6")
             require(THEATER_SIZES[theater], remaining_seats)
         ok("GET", resource)
     except Exception as e:
@@ -299,7 +305,7 @@ def main():
     check_post_movie()
     performances = check_post_performances()
     check_get_movies()
-    # check_get_movies_with_queries()
+    #check_get_movies_with_queries()
     check_get_movies_with_ids()
     check_get_performances(performances)
     check_ticket_hoarding()

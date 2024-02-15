@@ -39,7 +39,7 @@ CREATE TABLE performances (
     theater TEXT,
     date DATE,
     time TIME,
-    availableSeats INT,
+    remainingSeats INT,
     PRIMARY KEY (performanceId),
     FOREIGN KEY (imdbKey) REFERENCES movies(imdbKey)
     FOREIGN KEY (theater) REFERENCES theaters(theater)
@@ -56,24 +56,10 @@ CREATE TABLE tickets (
 );
 
 CREATE TRIGGER check_seats BEFORE INSERT ON tickets 
-WHEN((SELECT availableSeats FROM performances WHERE performanceId = new.performanceId) IS 0)
+WHEN((SELECT remainingSeats FROM performances WHERE performanceId = new.performanceId) IS 0)
 BEGIN
     -- if exception, then catch it in REST
     SELECT RAISE(ABORT, 'No available seats!');
 END;
 
-CREATE TRIGGER decrement_seats AFTER INSERT ON tickets
-BEGIN
-    UPDATE performances
-    SET
-        availableSeats = availableSeats - 1
-    WHERE performanceId = new.performanceId;
-END;
-
-CREATE TRIGGER increment_seats AFTER DELETE ON tickets
-BEGIN
-    UPDATE performances
-    SET 
-            availableSeats = availableSeats + 1
-    WHERE   performanceId = old.performanceId;
-END;
+CREATE TRIGGER decrement_seats AFTER INSERT ON tic
