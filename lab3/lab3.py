@@ -135,10 +135,10 @@ def insert_performances():
             db.commit()
             response.status = 201
             username, = found
-            return f"http://localhost:{PORT}/{username}"
+            return f"http://localhost:{PORT}/{performance_id}"
     except sqlite3.IntegrityError:
         response.status = 409
-        return "Movie is already in use"
+        return "Performance is already in use"
        
 
 
