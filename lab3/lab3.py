@@ -125,9 +125,8 @@ def insert_performances():
             VALUES (?,?,?,?)
             RETURNING  performanceId
             """,
-            [ newperformance['imdbKey'], newperformance['theater'], newperformance['date'], newperformance['time']]
+            [newperformance['imdbKey'], newperformance['theater'], newperformance['date'], newperformance['time']]
         )
-        print("hej")
         found = c.fetchone()
         if not found:
             response.status = 400
@@ -269,13 +268,16 @@ def insert_ticket():
         c.execute(
             """
             INSERT
-            INTO       tickets (username, performanceId)
-            VALUES     (?, ?)
+            INTO       tickets(username, performanceId)
+            VALUES     (?,?)
             RETURNING  ticketId
             """,
             [newticket['username'], newticket['performanceId']]
         )
-        ticket_id, = found
-        return f"/tickets/{ticket_id}"
+        found = c.fetchone()
+        db.commit()
+        response.status = 201
+        ticketId, = found
+        return f"/tickets/{ticketId}"
 
 run(host='localhost', port=PORT)
