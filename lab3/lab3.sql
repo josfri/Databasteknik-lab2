@@ -39,6 +39,7 @@ CREATE TABLE performances (
     theater TEXT,
     date DATE,
     time TIME,
+    availableSeats INT,
     PRIMARY KEY (performanceId),
     FOREIGN KEY (imdbKey) REFERENCES movies(imdbKey)
     FOREIGN KEY (theater) REFERENCES theaters(theater)
@@ -46,7 +47,7 @@ CREATE TABLE performances (
 
 
 CREATE TABLE tickets (
-    ticketId TEXT DEFAULT (lower(hex(randomblob(16)))),
+    ticketId TEXT DEFAULT (lower(hex(randomblob(16)))) NOT NULL,
     username TEXT,
     performanceId TEXT,
     PRIMARY KEY (ticketId),
@@ -54,18 +55,11 @@ CREATE TABLE tickets (
     FOREIGN KEY (performanceId) REFERENCES performances(performanceId)
 );
 
-DROP TRIGGER IF EXISTS tickets_left;
-CREATE TRIGGER tickets_left
-BEFORE INSERT ON tickets
-WHEN
-  (
-  SELECT coalesce(count(ticketId), 0) AS sold_tickets
-            FROM performances
-            LEFT OUTER JOIN tickets USING (performanceId)
-            JOIN theaters USING (theater)
-            GROUP BY performanceId
-            HAVING sold_tickets < capacity AND performanceId = NEW.performanceId
-)
+CREATE TRIGGER check_seats BEFORE INSERT ON tickets 
+WHEN((SELECT availableSeats FROM performances WHERE performanceId = new.performanceId) IS 0)
 BEGIN
-  SELECT RAISE (ROLLBACK, "No tickets left");
+    -- if exception, then catch it in REST
+    SELECT RAISE(ABORT, 'No available seats!');
 END;
+
+CREATE TRIGGER decrement_seats AFTER INSERT ON tic

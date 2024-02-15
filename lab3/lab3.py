@@ -193,7 +193,7 @@ def getPerformances():
     c = db.cursor()
     c.execute(
         """
-        SELECT performanceId, imdbKey, theater, date, time, year, title
+        SELECT performanceId, imdbKey, theater, date, time, year, title, availableSeats
         FROM performances JOIN movies USING (imdbKey)
         """
     )
@@ -207,65 +207,132 @@ def getPerformances():
               } for performanceId, imdbKey, theater, date, time, year, title in c]
     return {"data": found}
 
+
+# @post('/tickets')
+# def insert_ticket():
+#     newticket = request.json
+
+#     c = db.cursor()
+
+#     #Find customer?
+#     c.execute(
+#         """
+#         SELECT      username, pwd
+#         FROM        customers
+#         WHERE       username = ? AND pwd = ?
+#         """,
+#         [newticket['username'], hash(newticket['pwd'])]
+#     )
+    
+#     found = c.fetchone()
+#     if not found:
+#         response.status = 401
+#         return "User not found"
+
+#     ##Find performance?
+#     c.execute(
+#     """
+#     SELECT      performanceId
+#     FROM        performances
+#     WHERE       performanceId = ?
+#     """,
+#     [newticket['performanceId']]
+#     )
+#     found = c.fetchone()
+#     if not found:
+#         response.status = 400
+#         return "Performance was not found"
+    
+#     try:
+#         c.execute(
+#             """
+#             INSERT
+#             INTO       tickets(username, performanceId)
+#             VALUES     (?,?)
+#             RETURNING  ticketId
+#             """,
+#             [newticket['username'], newticket['performanceId']]
+#         )
+
+#         found = c.fetchone()
+#         response.status = 201
+
+#         c.execute(
+#         """
+#         SELECT      ticketId
+#         FROM        tickets
+#         """
+#         )
+#         found = c.fetchone()
+#         return f"/tickets/{found}"
+#     except Exception as e:
+#         response.status = 404
+#         return "No tickets left"
+
 @post('/tickets')
-def insert_ticket():
-    newticket = request.json
+def post_ticket():
+    ticket = request.json
 
     c = db.cursor()
 
-    #Find customer?
+    ## Check if user is valid
     c.execute(
         """
         SELECT      username, pwd
         FROM        customers
         WHERE       username = ? AND pwd = ?
         """,
-        [newticket['username'], hash(newticket['pwd'])]
+        [ticket['username'], hash(ticket['pwd'])]
     )
     
     found = c.fetchone()
     if not found:
         response.status = 401
-        return "User not found"
+        return "Wrong user credentials"
 
-    ##Find performance?
+    ## Check if performance exists
     c.execute(
     """
     SELECT      performanceId
     FROM        performances
     WHERE       performanceId = ?
     """,
-    [newticket['performanceId']]
+    [ticket['performanceId']]
     )
+
     found = c.fetchone()
     if not found:
         response.status = 400
-        return "Performance was not found"
-    
+        return "Error"
+
+    ## All checks has passed, now insert ticket
     try:
         c.execute(
             """
             INSERT
             INTO       tickets(username, performanceId)
-            VALUES     (?,?)
+            VALUES     (?, ?)
             RETURNING  ticketId
             """,
-            [newticket['username'], newticket['performanceId']]
+            [ticket['username'], ticket['performanceId']]
         )
-
+        print("stop1")
         found = c.fetchone()
-        response.status = 201
 
+        response.status = 201
+        print("stop2")
         c.execute(
         """
         SELECT      ticketId
         FROM        tickets
         """
         )
-        found = c.fetchone()
-        return f"/tickets/{found}"
+        print("stop3")
+        
+        return f"/tickets/{found[0]}"
     except Exception as e:
-        response.status = 404
+        response.status = 400
+        print(e)
         return "No tickets left"
     
 @get('/users/<username>/tickets')
