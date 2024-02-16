@@ -55,11 +55,23 @@ CREATE TABLE tickets (
     FOREIGN KEY (performanceId) REFERENCES performances(performanceId)
 );
 
-CREATE TRIGGER check_seats BEFORE INSERT ON tickets 
+CREATE TRIGGER check_seats 
+BEFORE INSERT ON tickets 
 WHEN((SELECT remainingSeats FROM performances WHERE performanceId = new.performanceId) IS 0)
 BEGIN
-    -- if exception, then catch it in REST
     SELECT RAISE(ABORT, 'No available seats!');
 END;
 
-CREATE TRIGGER decrement_seats AFTER INSERT ON tic
+CREATE TRIGGER decrement_seats AFTER INSERT ON tickets
+BEGIN
+    UPDATE performances
+    SET remainingSeats = remainingSeats - 1
+    WHERE performanceId = new.performanceId;
+END;
+
+CREATE TRIGGER increment_seats AFTER DELETE ON tickets
+BEGIN
+    UPDATE performances
+    SET remainingSeats = remainingSeats + 1
+    WHERE   performanceId = old.performanceId;
+END;
