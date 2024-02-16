@@ -275,12 +275,6 @@ def post_ticket():
         found = c.fetchone()
 
         response.status = 201  
-        c.execute(
-        """
-        SELECT      ticketId
-        FROM        tickets
-        """
-        )
         
         return f"/tickets/{found[0]}"
     except Exception as e:
