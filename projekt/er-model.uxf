@@ -1,4 +1,4 @@
-<diagram program="umletino" version="15.1"><zoom_level>10</zoom_level><element><id>UMLClass</id><coordinates><x>100</x><y>150</y><w>150</w><h>340</h></coordinates><panel_attributes>_Recipes_
+<diagram program="umletino" version="15.1"><zoom_level>11</zoom_level><element><id>UMLClass</id><coordinates><x>66</x><y>169</y><w>165</w><h>374</h></coordinates><panel_attributes>_Recipes_
 --
 _product_name_
 flour
@@ -22,18 +22,18 @@ cinnamon
 vanilla_sugar
 
 
-</panel_attributes><additional_attributes></additional_attributes></element><element><id>UMLClass</id><coordinates><x>390</x><y>60</y><w>160</w><h>80</h></coordinates><panel_attributes>_Warehouse_
+</panel_attributes><additional_attributes></additional_attributes></element><element><id>UMLClass</id><coordinates><x>385</x><y>70</y><w>176</w><h>88</h></coordinates><panel_attributes>_Warehouse_
 --
 _ingredient_
 amount
-</panel_attributes><additional_attributes></additional_attributes></element><element><id>Relation</id><coordinates><x>240</x><y>260</y><w>150</w><h>40</h></coordinates><panel_attributes>lt=-
+</panel_attributes><additional_attributes></additional_attributes></element><element><id>Relation</id><coordinates><x>220</x><y>290</y><w>165</w><h>44</h></coordinates><panel_attributes>lt=-
 m1=1
-m2=*</panel_attributes><additional_attributes>10;10;130;10</additional_attributes></element><element><id>Relation</id><coordinates><x>470</x><y>130</y><w>40</w><h>110</h></coordinates><panel_attributes>lt=-
+m2=*</panel_attributes><additional_attributes>10;10;130;10</additional_attributes></element><element><id>Relation</id><coordinates><x>473</x><y>147</y><w>44</w><h>121</h></coordinates><panel_attributes>lt=-
 m1=1
-m2=*</panel_attributes><additional_attributes>10;10;10;90</additional_attributes></element><element><id>UMLClass</id><coordinates><x>660</x><y>420</y><w>170</w><h>130</h></coordinates><panel_attributes>_Customer_
+m2=*</panel_attributes><additional_attributes>10;10;10;90</additional_attributes></element><element><id>UMLClass</id><coordinates><x>682</x><y>466</y><w>187</w><h>143</h></coordinates><panel_attributes>_Customer_
 --
 _customer_name_
-address</panel_attributes><additional_attributes></additional_attributes></element><element><id>UMLClass</id><coordinates><x>390</x><y>430</y><w>170</w><h>140</h></coordinates><panel_attributes>&lt;weak&gt;
+address</panel_attributes><additional_attributes></additional_attributes></element><element><id>UMLClass</id><coordinates><x>385</x><y>477</y><w>187</w><h>154</h></coordinates><panel_attributes>&lt;weak&gt;
 _Orders_
 --
 _order_id_
@@ -41,11 +41,11 @@ customer name
 product_name
 nbr_of_pallets
 delivery_day
-delivery_time</panel_attributes><additional_attributes></additional_attributes></element><element><id>Relation</id><coordinates><x>550</x><y>480</y><w>130</w><h>40</h></coordinates><panel_attributes>lt=-
+delivery_time</panel_attributes><additional_attributes></additional_attributes></element><element><id>Relation</id><coordinates><x>561</x><y>532</y><w>143</w><h>44</h></coordinates><panel_attributes>lt=-
 m1=*
-m2=1</panel_attributes><additional_attributes>10;10;110;10</additional_attributes></element><element><id>Relation</id><coordinates><x>470</x><y>320</y><w>40</w><h>130</h></coordinates><panel_attributes>lt=-
+m2=1</panel_attributes><additional_attributes>10;10;110;10</additional_attributes></element><element><id>Relation</id><coordinates><x>473</x><y>356</y><w>44</w><h>143</h></coordinates><panel_attributes>lt=-
 m1=1
-m2=*</panel_attributes><additional_attributes>10;10;10;110</additional_attributes></element><element><id>UMLClass</id><coordinates><x>370</x><y>220</y><w>210</w><h>110</h></coordinates><panel_attributes>_Pallets_
+m2=*</panel_attributes><additional_attributes>10;10;10;110</additional_attributes></element><element><id>UMLClass</id><coordinates><x>363</x><y>246</y><w>231</w><h>121</h></coordinates><panel_attributes>_Pallets_
 --
 _pallet_nbr_
 product_name
