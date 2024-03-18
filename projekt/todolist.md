@@ -1,11 +1,11 @@
 databasen: fabian fixat
 
 Funktioner: 
-1. Reset database
+1. Reset database- fabian
 
-2. Add and check customers 
+2. Add and check customers - josse
 
-3. Add and check ingredients
+3. Add and check ingredients - fremja
 
 4. Add and check recipes/ookies
 
