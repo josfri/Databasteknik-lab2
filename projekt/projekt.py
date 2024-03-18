@@ -12,6 +12,20 @@ db.execute("PRAGMA foreign_keys = ON")
 
 
 
+#Reset database
+
+#Add and check customers
+
+#Add and check ingredients
+
+#Add and check recipes/ookies
+
+#Add and check pallets
+
+#Blocking and unblocking
+
+#Cookies part 2
+
 
 
 #functions end here 
