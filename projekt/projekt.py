@@ -28,7 +28,7 @@ def add_ingredient():
             INTO Warehouse(ingredient, unit)
             VALUES (?, ?)
         """, 
-        [ new_ingredient('ingredient'), new_ingredient('unit'),]
+        [ new_ingredient['ingredient'], new_ingredient['unit']]
     )
   
     url_encoded_ingredient = quote(new_ingredient('ingredient'))
@@ -49,7 +49,7 @@ def update_ingredient(ingredient):
                 amount = amount + ?, 
             WHERE ingredient = ?
             RETURNING ingredient, amount, unit
-        """, [new_delivery('deliveryTime'), new_delivery('quantity'), new_delivery('quantity'), ingredient]
+        """, [new_delivery['deliveryTime'], new_delivery['quantity'], new_delivery['quantity'], ingredient]
     ) # här kan man göra en trigger istället i databsen som ändrar amount i warehpuse när vi lägger till en delivery. OBS vet ej om det funkar som det är nu!! 
   
     found = [{ 
