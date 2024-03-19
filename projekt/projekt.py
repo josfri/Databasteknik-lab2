@@ -1,5 +1,5 @@
 from bottle import get, post, run, response, request
-from urllib.parse import unquote
+from urllib.parse import quote, unquote
 import sqlite3
 
 # Set-up
@@ -31,7 +31,7 @@ def add_ingredient():
         [ new_ingredient['ingredient'], new_ingredient['unit']]
     )
   
-    url_encoded_ingredient = quote(new_ingredient('ingredient'))
+    url_encoded_ingredient = quote(new_ingredient['ingredient'])
     response.status = 201
     return {
         'location' : f'/ingredients/' + url_encoded_ingredient 
@@ -49,9 +49,9 @@ def update_ingredient(ingredient):
                 amount = amount + ?, 
             WHERE ingredient = ?
             RETURNING ingredient, amount, unit
-        """, [new_delivery['deliveryTime'], new_delivery['quantity'], new_delivery['quantity'], ingredient]
+        """, [new_delivery['deliveryTime'], new_delivery['quantity'], new_delivery['quantity'], unquote(ingredient)]
     ) # här kan man göra en trigger istället i databsen som ändrar amount i warehpuse när vi lägger till en delivery. OBS vet ej om det funkar som det är nu!! 
-  
+  # och borde man unquotea ingredient i input-attributet??? 
     found = [{ 
         "ingredient": ingredient, 
         "quantity": amount, 
@@ -81,7 +81,60 @@ def get_ingredients():
         "data": found
     }
 
-#--------Add and check recipes/ookies-----------
+#--------Add and check recipes/ookies- Fremjas kod-----------
+
+@post('/cookies')
+def add_cookies():
+    new_cookie = request.json 
+    c = db.cursor()
+    for recipeline in new_cookie['recipe'] :
+        c.execute(
+            """
+            INSERT 
+            INTO Recipe_quantity(product_name, ingredient, amount)
+            VALUES (?, ?, ?)
+            """, [new_cookie['name'], recipeline['ingredient'], recipeline['amount']]
+        )
+    response.status = 201 
+    url_cookie_name = quote(new_cookie['name'])
+    return{ 'location': f'/cookies/'+ url_cookie_name}
+
+@get('/cookies')
+def get_cookie_names(): 
+    c = db.cursor()
+    c.execute(
+        """
+        SELECT product_name 
+        FROM Recipe 
+        """
+    )
+    found = [{ 
+        "name": product_name} for product_name in c
+    ]
+    response.status = 200
+    return {
+        "data": found
+    }
+
+@get('/cookies/<cookie_name>/recipe')
+def get_cookie_recipe(cookie_name):
+  c = db.cursor()
+  c.execute(
+      """
+      SELECT ingredient, amount, unit
+      FROM Recipe_quantity 
+      WHERW product_name = ?
+      """, [unquote(cookie_name)]
+  )
+  found = [{'ingredient': ingredient, 'amount': amount, 'unit': unit} for ingredient, amount, unit in c]
+  if not found:
+      response.status = 404
+  else:
+      response.status = 200
+  return { 'data': found }
+
+
+
 
 #Add and check pallets
 
