@@ -7,7 +7,7 @@ Funktioner:
 
 3. Add and check ingredients - fremja
 
-4. Add and check recipes/ookies
+4. Add and check recipes/cookies - fremja
 
 5. Add and check pallets 
 
