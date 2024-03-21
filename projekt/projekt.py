@@ -234,26 +234,51 @@ def post_pallet():
 def post_cookies_block(cookie_name):
     
     c = db.cursor()
-    c.execute( 
-        """
+
+    query = """
             UPDATE pallets
             SET is_blocked = True
             WHERE product_name = ?
-        """, [cookie_name['product_name']]
-    )
+            """
+    
+    params = ['product_name']
+
+    if request.query.before:
+        query += " AND production_date < ?"
+        params.append(unquote(request.query.before))
+    if request.query.after:
+        query += " AND production_date > ?"
+        params.append(unquote(request.query.after))
+
+    c.execute(query,params)
+
+    response.status = 205
+    return ""
 
 @post('/cookies/<cookie_name>/unblock')
 def post_cookies_unblock(cookie_name):
 
     c = db.cursor()
-    c.execute( 
-        """
+
+    query = """
             UPDATE pallets
             SET is_blocked = False
             WHERE product_name = ?
-        """, [cookie_name['product_name']]
+            """
+    
+    params = ['product_name']
 
-    )
+    if request.query.before:
+        query += " AND production_date < ?"
+        params.append(unquote(request.query.before))
+    if request.query.after:
+        query += " AND production_date > ?"
+        params.append(unquote(request.query.after))
+
+    c.execute(query,params)
+
+    response.status = 205
+    return ""
 
 
 #---------- Cookies part 2 ----------
