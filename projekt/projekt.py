@@ -202,8 +202,60 @@ def post_pallet():
         response.status = 400
         return {"error": "Cookie name is required."}
 
-    #try:
+    try:
+        db.execute("BEGIN")
 
+        #Check if there is enough ingredients for the cookie 
+        c.ececute(
+            """
+            SELECT r.ingredient, (w.amount - r.amount) as remaining_amount
+            FROM Recipe_quantity r
+            JOIN Warehouse w ON r.ingredient = w.ingredient
+            WHERE r.product_name = ?
+            HAVING remaining_amount < 0
+            """, (cookie_name,)
+        )
+        insufficient_ingredients = c.fetchall()
+    
+        if insufficient_ingredients:
+            response.status = 422
+            return {"error": "Insufficient ingredients for this cookie.", "details": insufficient_ingredients}
+    
+        #Deduct the amount needed for the cookies from the warehouse
+        c.execute(
+            """
+            UPDATE Warehouse
+            SET amount = amount - (
+                SELECT amount
+                FROM Recipe_quantity
+                WHERE product_name = ?
+                AND ingredient = Warehouse.ingredient
+            )
+            WHERE ingredient IN (
+                SELECT ingredient
+                FROM Recipe_quantity
+                WHERE product_name = ?
+            )
+            """, (cookie_name, cookie_name)
+        )
+
+        #Create new pallet with timestamp
+        c.execute(
+            """
+            INSERT INTO Pallet (production_date, production_time, blocked, product_name)
+            VALUES (DATE('now'), TIME('now'), False, ?)
+            """, [cookie_name]
+        )
+
+        db.commit()
+        response.status = 201
+        pallet_id = c.lastrowid
+        return {"message": "Pallet added successfully", "pallet_id": pallet_id}
+
+    except sqlite3.Error as e:
+        db.rollback()
+        response.status = 500
+        return {"error": str(e)}
         
     
 
