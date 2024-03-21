@@ -24,12 +24,11 @@ CREATE TABLE Recipe_quantity (
 
 CREATE TABLE Customer (
     customer_name TEXT,
-    customer_address TEXT,
+    address TEXT,
     PRIMARY KEY (customer_name)
 );
--- Ändrade address till customer_address då address highlightades i blått i vs code
 
-CREATE TABLE Orders (
+CREATE TABLE Order (
     order_id INT AUTO_INCREMENT,
     delivery_day DATE,
     delivery_time TIME,
@@ -50,14 +49,14 @@ CREATE TABLE Pallet (
     order_id INT,
     PRIMARY KEY (pallet_nbr),
     FOREIGN KEY (product_name) REFERENCES Recipe(product_name),
-    FOREIGN KEY (order_id) REFERENCES Orders(order_id)
+    FOREIGN KEY (order_id) REFERENCES Order(order_id)
 );
 
 CREATE TABLE Order_item (
     order_id INT,
     pallet_nbr INT,
     nbr_pallets INT,
-    FOREIGN KEY (order_id) REFERENCES Orders(order_id),
+    FOREIGN KEY (order_id) REFERENCES Order(order_id),
     FOREIGN KEY (pallet_nbr) REFERENCES Pallet(pallet_nbr)
 );
 
