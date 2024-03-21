@@ -34,7 +34,7 @@ def reset():
     db.commit()
 
 
-#Add and check customers
+#---------- Add and check customers ----------
 
 #----------Add and check ingredients- Fremjas kod----------------
 
@@ -156,11 +156,11 @@ def get_cookie_recipe(cookie_name):
 
 
 
-#Add and check pallets
+#---------- Add and check pallets ----------
 
-#Blocking and unblocking
+#---------- Blocking and unblocking ----------
 
-#Cookies part 2
+#---------- Cookies part 2 ----------
 
 
 
