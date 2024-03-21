@@ -196,7 +196,7 @@ def get_cookie_recipe(cookie_name):
 def post_pallet():
     new_pallet = request.json
     c = db.cursor()
-    cookie_name = new_pallet.get
+    cookie_name = new_pallet.get('cookie')
 
     if not cookie_name or 'cookie' not in cookie_name:
         response.status = 400
@@ -206,7 +206,7 @@ def post_pallet():
         db.execute("BEGIN")
 
         #Check if there is enough ingredients for the cookie 
-        c.ececute(
+        c.execute(
             """
             SELECT r.ingredient, (w.amount - r.amount) as remaining_amount
             FROM Recipe_quantity r
@@ -243,7 +243,7 @@ def post_pallet():
         c.execute(
             """
             INSERT INTO Pallet (production_date, production_time, blocked, product_name)
-            VALUES (DATE('now'), TIME('now'), False, ?)
+            VALUES (DATE('now'), TIME('now'), 0, ?)
             """, [cookie_name]
         )
 
