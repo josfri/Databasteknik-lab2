@@ -39,6 +39,24 @@ def reset():
 
 
 #---------- Add and check customers ----------
+@post('/customers')
+def add_customer(): 
+    new_customer = request.json #hämta json objektet 
+    c = db.cursor()
+    c.execute( 
+        """
+            INSERT 
+            INTO Customer(customer_name, address)
+            VALUES (?, ?)
+        """, 
+        [ new_customer['customer_name'], new_customer['address']]
+    )
+  
+    url_encoded_cname = new_customer['customer_name'])
+    response.status = 201
+    return {
+        'location' : f'/ingredients/' + url_encoded_cname
+    }
 
 #----------Add and check ingredients- Fremjas kod----------------
 
@@ -161,6 +179,9 @@ def get_cookie_recipe(cookie_name):
 
 
 #---------- Add and check pallets ----------
+
+@post('/pallets')
+
 
 #---------- Blocking and unblocking ----------
 
