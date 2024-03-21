@@ -4,13 +4,10 @@ import sqlite3
 
 # Set-up
 PORT = 7007
+
 # sqlite3 lab3.sqlite < lab3.sql
 db = sqlite3.connect("/Users/josefinefrid/Desktop/Databasteknik/lab2/Databasteknik-lab2/lab3/lab3.sqlite")
 db.execute("PRAGMA foreign_keys = ON")
-
-#functions start here 
-
-
 
 #---------- Reset database ----------
 
@@ -36,8 +33,6 @@ def reset():
         "location": '/'
     }
 
-
-
 #---------- Add and check customers ----------
 @post('/customers')
 def add_customer(): 
@@ -52,7 +47,7 @@ def add_customer():
         [ new_customer['customer_name'], new_customer['address']]
     )
   
-    url_encoded_cname = new_customer['customer_name'])
+    url_encoded_cname = quote(new_customer['customer_name'])
     response.status = 201
     return {
         'location' : f'/ingredients/' + url_encoded_cname
@@ -184,6 +179,31 @@ def get_cookie_recipe(cookie_name):
 
 
 #---------- Blocking and unblocking ----------
+@post('/cookies/<cookie_name>/block')
+def post_cookies_block(cookie_name):
+    
+    c = db.cursor()
+    c.execute( 
+        """
+            UPDATE pallets
+            SET is_blocked = True
+            WHERE product_name = ?
+        """, [cookie_name['product_name']]
+    )
+
+@post('/cookies/<cookie_name>/unblock')
+def post_cookies_unblock(cookie_name):
+
+    c = db.cursor()
+    c.execute( 
+        """
+            UPDATE pallets
+            SET is_blocked = False
+            WHERE product_name = ?
+        """, [cookie_name['product_name']]
+
+    )
+
 
 #---------- Cookies part 2 ----------
 
