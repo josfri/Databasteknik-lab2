@@ -219,9 +219,14 @@ def get_cookie_recipe(cookie_name):
 def post_pallet():
     new_pallet = request.json
     c = db.cursor()
-    c.execute(
-        """
-            IN
+    cookie_name = new_pallet.get
+
+    if not cookie_name or 'cookie' not in cookie_name:
+        response.status = 400
+        return {"error": "Cookie name is required."}
+
+    try:
+        
     
 
 #---------- Blocking and unblocking ----------
