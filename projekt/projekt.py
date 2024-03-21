@@ -31,7 +31,11 @@ def reset():
 
         """
     )
-    db.commit()
+    response.status = 205 
+    return { 
+        "location": '/'
+    }
+
 
 
 #---------- Add and check customers ----------
