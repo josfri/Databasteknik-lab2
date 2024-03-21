@@ -12,7 +12,10 @@ db.execute("PRAGMA foreign_keys = ON")
 
 
 
-#Reset database
+#---------- Reset database ----------
+
+
+
 
 #Add and check customers
 
