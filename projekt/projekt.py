@@ -14,7 +14,24 @@ db.execute("PRAGMA foreign_keys = ON")
 
 #---------- Reset database ----------
 
+@post('/reset')
+def reset():
+    c = db.cursor()
+    c.executescript(
+        """
+        PRAGMA foreign_keys = OFF;
+        DELETE FROM Warehouse;
+        DELETE FROM Recipe;
+        DELETE FROM Recipe_quantity;
+        DELETE FROM Customer;
+        DELETE FROM Order;
+        DELETE FROM Pallet;
+        DELETE FROM Order_item;
+        PRAGMA foreign_keys = ON;
 
+        """
+    )
+    db.commit()
 
 
 #Add and check customers
