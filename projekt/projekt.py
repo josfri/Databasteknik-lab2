@@ -9,8 +9,9 @@ PORT = 7007
 db = sqlite3.connect("/Users/josefinefrid/Desktop/Databasteknik/lab2/Databasteknik-lab2/lab3/lab3.sqlite")
 db.execute("PRAGMA foreign_keys = ON")
 
-#---------- Reset database ----------
+# ---- Functions start here ------
 
+#---------- Reset database ----------
 @post('/reset')
 def reset():
     c = db.cursor()
@@ -25,7 +26,6 @@ def reset():
         DELETE FROM Pallet;
         DELETE FROM Order_item;
         PRAGMA foreign_keys = ON;
-
         """
     )
     response.status = 205 
@@ -71,30 +71,8 @@ def get_customers():
         "data": found
     }
 
-@get('/cookies')
-def get_cookie_names(): 
-    c = db.cursor()
-    c.execute(
-        """
-        SELECT product_name, count() AS nbr_of_pallets
-        FROM Recipe LEFT JOIN Pallets USING (product_name)
-        GROUP BY product_name 
-        HAVING product_name IN (
-            SELECT pallet_nbr 
-            FROM Pallets 
-            WHERE blocked = False
-        )
-        """
-    )
-    found = [{ "name": product_name, "pallets": nbr_of_pallets} for product_name, nbr_of_pallets  in c]
-    response.status = 200
-    return {
-        "data": found
-    }
 
-
-#----------Add and check ingredients- Fremjas kod----------------
-
+#----------Add and check ingredients----------------
 @post('/ingredients')
 def add_ingredient(): 
     new_ingredient = request.json #hämta json objektet 
@@ -158,8 +136,7 @@ def get_ingredients():
         "data": found
     }
 
-#--------Add and check recipes/ookies- Fremjas kod-----------
-
+#--------Add and check recipes/cookies-----------
 @post('/cookies')
 def add_cookies():
     new_cookie = request.json 
@@ -181,13 +158,17 @@ def get_cookie_names():
     c = db.cursor()
     c.execute(
         """
-        SELECT product_name 
-        FROM Recipe 
+        SELECT product_name, count() AS nbr_of_pallets
+        FROM Recipe LEFT JOIN Pallets USING (product_name)
+        GROUP BY product_name 
+        HAVING product_name IN (
+            SELECT pallet_nbr 
+            FROM Pallets 
+            WHERE blocked = False
+        )
         """
     )
-    found = [{ 
-        "name": product_name} for product_name in c
-    ]
+    found = [{ "name": product_name, "pallets": nbr_of_pallets} for product_name, nbr_of_pallets  in c]
     response.status = 200
     return {
         "data": found
@@ -210,11 +191,7 @@ def get_cookie_recipe(cookie_name):
       response.status = 200
   return { 'data': found }
 
-
-
-
 #---------- Add and check pallets ----------
-
 @post('/pallets')
 def post_pallet():
     new_pallet = request.json
@@ -225,7 +202,8 @@ def post_pallet():
         response.status = 400
         return {"error": "Cookie name is required."}
 
-    try:
+    #try:
+
         
     
 
@@ -280,11 +258,6 @@ def post_cookies_unblock(cookie_name):
     response.status = 205
     return ""
 
-
-#---------- Cookies part 2 ----------
-
-
-
-#functions end here 
+# ---- Functions end here ------
 
 run(host='localhost', port=PORT)
