@@ -53,6 +53,46 @@ def add_customer():
         'location' : f'/ingredients/' + url_encoded_cname
     }
 
+@get('/customers')
+def get_customers(): 
+    c = db.cursor()
+    c.execute(
+        """
+        SELECT customer_name, address
+        FROM Customer
+        """
+    )
+    found = [{ 
+        "name": customer_name, 
+        "address": address } for customer_name, address in c
+    ]
+    response.status = 200
+    return {
+        "data": found
+    }
+
+@get('/cookies')
+def get_cookie_names(): 
+    c = db.cursor()
+    c.execute(
+        """
+        SELECT product_name, count() AS nbr_of_pallets
+        FROM Recipe LEFT JOIN Pallets USING (product_name)
+        GROUP BY product_name 
+        HAVING product_name IN (
+            SELECT pallet_nbr 
+            FROM Pallets 
+            WHERE blocked = False
+        )
+        """
+    )
+    found = [{ "name": product_name, "pallets": nbr_of_pallets} for product_name, nbr_of_pallets  in c]
+    response.status = 200
+    return {
+        "data": found
+    }
+
+
 #----------Add and check ingredients- Fremjas kod----------------
 
 @post('/ingredients')
@@ -176,7 +216,13 @@ def get_cookie_recipe(cookie_name):
 #---------- Add and check pallets ----------
 
 @post('/pallets')
-
+def post_pallet():
+    new_pallet = request.json
+    c = db.cursor()
+    c.execute(
+        """
+            IN
+    
 
 #---------- Blocking and unblocking ----------
 @post('/cookies/<cookie_name>/block')
