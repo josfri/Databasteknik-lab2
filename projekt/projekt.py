@@ -5,11 +5,9 @@ import sqlite3
 # Set-up
 PORT = 7007
 
-# sqlite3 lab3.sqlite < lab3.sql
-db = sqlite3.connect("/Users/josefinefrid/Desktop/Databasteknik/lab2/Databasteknik-lab2/lab3/lab3.sqlite")
+# sqlite3 kookie.sqlite < create-schema.sql
+db = sqlite3.connect("/Users/josefinefrid/Desktop/Databasteknik/lab2/Databasteknik-lab2/projekt/projekt.sqlite")
 db.execute("PRAGMA foreign_keys = ON")
-
-# ---- Functions start here ------
 
 #---------- Reset database ----------
 @post('/reset')
@@ -257,7 +255,25 @@ def post_pallet():
         response.status = 500
         return {"error": str(e)}
         
-    
+# ---- Kladd! Ej klar alls!! /J
+@get('/pallets')
+def get_pallets(): 
+    c = db.cursor()
+    c.execute(
+        """
+        SELECT id, cookie, production_date, blocked
+        FROM Pallet
+        """
+    )
+    found = [{ 
+        "name": customer_name, 
+        "address": address } for customer_name, address in c
+    ]
+    response.status = 200
+    return {
+        "data": found
+    }
+   
 
 #---------- Blocking and unblocking ----------
 @post('/cookies/<cookie_name>/block')

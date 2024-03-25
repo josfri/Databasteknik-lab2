@@ -4,7 +4,7 @@
 implemented well enough to pass the project.
 
 """
-
+# python3 /Users/josefinefrid/Desktop/Databasteknik/lab2/Databasteknik-lab2/projekt/kookie-test.py
 from collections import Counter
 from urllib.parse import quote, unquote
 import itertools
