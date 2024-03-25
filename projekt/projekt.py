@@ -3,9 +3,10 @@ from urllib.parse import quote, unquote
 import sqlite3
 
 # Set-up
-PORT = 7007
+PORT = 8888
 
-# sqlite3 kookie.sqlite < create-schema.sql
+
+
 db = sqlite3.connect("/Users/josefinefrid/Desktop/Databasteknik/lab2/Databasteknik-lab2/projekt/projekt.sqlite")
 db.execute("PRAGMA foreign_keys = ON")
 
@@ -16,16 +17,17 @@ def reset():
     c.executescript(
         """
         PRAGMA foreign_keys = OFF;
-        DELETE FROM Warehouse;
-        DELETE FROM Recipe;
-        DELETE FROM Recipe_quantity;
-        DELETE FROM Customer;
-        DELETE FROM Order;
-        DELETE FROM Pallet;
-        DELETE FROM Order_item;
+        DELETE FROM warehouses;
+        DELETE FROM recipes;
+        DELETE FROM recipe_quantities;
+        DELETE FROM customers;
+        DELETE FROM orders;
+        DELETE FROM pallets;
+        DELETE FROM order_items;
         PRAGMA foreign_keys = ON;
         """
     )
+    db.commit()
     response.status = 205 
     return { 
         "location": '/'
