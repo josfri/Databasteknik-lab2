@@ -19,7 +19,7 @@ PRAGMA foreign_keys = ON;
 -- Frågan är om det ska vara decimaler eller inte i siffrorna, dvs om det ska vara INT eller DECIMAL
 CREATE TABLE warehouses (
     ingredient TEXT,
-    amount DECIMAL NOT NULL,
+    amount DECIMAL NOT NULL DEFAULT (0),
     unit TEXT,
     last_delivery_time TIME,
     last_delivery_amount DECIMAL NOT NULL,

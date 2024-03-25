@@ -21,8 +21,8 @@ PORT=8888
 
 CUSTOMER_INPUT = [
     ("Bullar och bong", "Bakgatan 4, Lund"),
-    ("CafÃ© Ingalunda", "Ã…tervÃ¤ndsgrÃ¤nden 1, Kivik"),
-    ("Kakbak HB", "Degkroken 8, MalmÃ¶"),
+    ("Cafe Ingalunda", "Atervandsgranden 1, Kivik"),
+    ("Kakbak HB", "Degkroken 8, Malmo"),
 ]
 
 INGREDIENT_INPUT = [

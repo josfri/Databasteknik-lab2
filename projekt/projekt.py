@@ -6,7 +6,6 @@ import sqlite3
 PORT = 8888
 
 
-
 db = sqlite3.connect("/Users/josefinefrid/Desktop/Databasteknik/lab2/Databasteknik-lab2/projekt/projekt.sqlite")
 db.execute("PRAGMA foreign_keys = ON")
 
@@ -41,16 +40,17 @@ def add_customer():
     c.execute( 
         """
             INSERT 
-            INTO Customer(customer_name, address)
+            INTO customers(customer_name, address)
             VALUES (?, ?)
         """, 
-        [ new_customer['customer_name'], new_customer['address']]
+        [ new_customer['name'], new_customer['address']]
     )
-  
-    url_encoded_cname = quote(new_customer['customer_name'])
+
+    db.commit()
     response.status = 201
+
     return {
-        'location' : f'/ingredients/' + url_encoded_cname
+        'location' : f'/customers/' + quote(new_customer['name'])
     }
 
 @get('/customers')
@@ -59,7 +59,7 @@ def get_customers():
     c.execute(
         """
         SELECT customer_name, address
-        FROM Customer
+        FROM customers
         """
     )
     found = [{ 
@@ -75,21 +75,24 @@ def get_customers():
 #----------Add and check ingredients----------------
 @post('/ingredients')
 def add_ingredient(): 
-    new_ingredient = request.json #hämta json objektet 
+
+    new_ingredient = request.json  
     c = db.cursor()
+
     c.execute( 
         """
             INSERT 
-            INTO Warehouse(ingredient, unit)
+            INTO warehouses(ingredient, unit)
             VALUES (?, ?)
         """, 
         [ new_ingredient['ingredient'], new_ingredient['unit']]
     )
-  
-    url_encoded_ingredient = quote(new_ingredient['ingredient'])
+
+    db.commit()
     response.status = 201
+
     return {
-        'location' : f'/ingredients/' + url_encoded_ingredient 
+        'location' : f'/ingredients/' + quote(new_ingredient['ingredient'])
     }
 
 @post('/ingredients/<ingredient>/deliveries')
@@ -98,7 +101,7 @@ def update_ingredient(ingredient):
     c = db.cursor()
     c.execute( 
         """
-            UPDATE Warehouse 
+            UPDATE warehouses 
             SET last_delivery_time = ?, 
                 last_delivery_amount = ?,
                 amount = amount + ?, 
@@ -123,7 +126,7 @@ def get_ingredients():
     c.execute(
         """
         SELECT ingredient, amount, unit
-        FROM Warehouse 
+        FROM warehouses 
         """
     )
     found = [{ 
@@ -145,7 +148,7 @@ def add_cookies():
         c.execute(
             """
             INSERT 
-            INTO Recipe_quantity(product_name, ingredient, amount)
+            INTO recipe_quantities(product_name, ingredient, amount)
             VALUES (?, ?, ?)
             """, [new_cookie['name'], recipeline['ingredient'], recipeline['amount']]
         )
@@ -159,11 +162,11 @@ def get_cookie_names():
     c.execute(
         """
         SELECT product_name, count() AS nbr_of_pallets
-        FROM Recipe LEFT JOIN Pallets USING (product_name)
+        FROM recipes LEFT JOIN pallets USING (product_name)
         GROUP BY product_name 
         HAVING product_name IN (
             SELECT pallet_nbr 
-            FROM Pallets 
+            FROM pallets 
             WHERE blocked = False
         )
         """
@@ -180,8 +183,8 @@ def get_cookie_recipe(cookie_name):
   c.execute(
       """
       SELECT ingredient, amount, unit
-      FROM Recipe_quantity 
-      WHERW product_name = ?
+      FROM recipe_quantities
+      WHERE product_name = ?
       """, [unquote(cookie_name)]
   )
   found = [{'ingredient': ingredient, 'amount': amount, 'unit': unit} for ingredient, amount, unit in c]
@@ -209,8 +212,8 @@ def post_pallet():
         c.execute(
             """
             SELECT r.ingredient, (w.amount - r.amount) as remaining_amount
-            FROM Recipe_quantity r
-            JOIN Warehouse w ON r.ingredient = w.ingredient
+            FROM recipe_quantities r
+            JOIN warehouses w ON r.ingredient = w.ingredient
             WHERE r.product_name = ?
             HAVING remaining_amount < 0
             """, (cookie_name,)
@@ -224,16 +227,16 @@ def post_pallet():
         #Deduct the amount needed for the cookies from the warehouse
         c.execute(
             """
-            UPDATE Warehouse
+            UPDATE warehouses
             SET amount = amount - (
                 SELECT amount
                 FROM Recipe_quantity
                 WHERE product_name = ?
-                AND ingredient = Warehouse.ingredient
+                AND ingredient = warehouses.ingredient
             )
             WHERE ingredient IN (
                 SELECT ingredient
-                FROM Recipe_quantity
+                FROM recipe_quantities
                 WHERE product_name = ?
             )
             """, (cookie_name, cookie_name)
@@ -242,7 +245,7 @@ def post_pallet():
         #Create new pallet with timestamp
         c.execute(
             """
-            INSERT INTO Pallet (production_date, production_time, blocked, product_name)
+            INSERT INTO pallets (production_date, production_time, blocked, product_name)
             VALUES (DATE('now'), TIME('now'), 0, ?)
             """, [cookie_name]
         )
@@ -264,7 +267,7 @@ def get_pallets():
     c.execute(
         """
         SELECT id, cookie, production_date, blocked
-        FROM Pallet
+        FROM pallets
         """
     )
     found = [{ 
