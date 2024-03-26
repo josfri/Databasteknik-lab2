@@ -104,7 +104,7 @@ def update_ingredient(ingredient):
             UPDATE warehouses 
             SET last_delivery_time = ?, 
                 last_delivery_amount = ?,
-                amount = amount + ?, 
+                amount = amount + ?
             WHERE ingredient = ?
             RETURNING ingredient, amount, unit
         """, [new_delivery['deliveryTime'], new_delivery['quantity'], new_delivery['quantity'], unquote(ingredient)]
@@ -206,12 +206,12 @@ def post_pallet():
         return {"error": "Cookie name is required."}
 
     try:
-        db.execute("BEGIN")
+        #db.execute("BEGIN")
 
         #Check if there is enough ingredients for the cookie 
         c.execute(
             """
-            SELECT r.ingredient, (w.amount - r.amount) as remaining_amount
+            SELECT r.ingredient, (w.amount - r.amount) AS remaining_amount
             FROM recipe_quantities r
             JOIN warehouses w ON r.ingredient = w.ingredient
             WHERE r.product_name = ?
@@ -230,7 +230,7 @@ def post_pallet():
             UPDATE warehouses
             SET amount = amount - (
                 SELECT amount
-                FROM Recipe_quantity
+                FROM recipe_quantities
                 WHERE product_name = ?
                 AND ingredient = warehouses.ingredient
             )
@@ -263,16 +263,31 @@ def post_pallet():
 # ---- Kladd! Ej klar alls!! /J
 @get('/pallets')
 def get_pallets(): 
+
     c = db.cursor()
-    c.execute(
-        """
-        SELECT id, cookie, production_date, blocked
-        FROM pallets
-        """
-    )
+
+    query = """
+            SELECT pallet_nbr, product_name, production_date, blocked
+            FROM pallets
+            WHERE product_name = ?
+            """
+    
+    params = ['product_name']
+
+    if request.query.before:
+        query += " AND production_date < ?"
+        params.append(unquote(request.query.before))
+    if request.query.after:
+        query += " AND production_date > ?"
+        params.append(unquote(request.query.after))
+
+    c.execute(query,params)
     found = [{ 
-        "name": customer_name, 
-        "address": address } for customer_name, address in c
+        "id": pallet_nbr, 
+        "cookie": product_name,
+        "productionDate" : production_date,
+        "blocked" : blocked
+          } for pallet_nbr, product_name, production_date, blocked in c
     ]
     response.status = 200
     return {

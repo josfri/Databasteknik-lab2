@@ -21,8 +21,8 @@ CREATE TABLE warehouses (
     ingredient TEXT,
     amount DECIMAL NOT NULL DEFAULT (0),
     unit TEXT,
-    last_delivery_time TIME,
-    last_delivery_amount DECIMAL NOT NULL,
+    last_delivery_time DATETIME,
+    last_delivery_amount INT,
     PRIMARY KEY (ingredient)
 );
 
@@ -34,7 +34,8 @@ CREATE TABLE recipes (
 CREATE TABLE recipe_quantities (
     product_name TEXT,
     ingredient TEXT,
-    amount DECIMAL NOT NULL,
+    amount INT NOT NULL CHECK (amount > 0),
+    PRIMARY KEY (product_name, ingredient)
     FOREIGN KEY (product_name) REFERENCES recipes(product_name),
     FOREIGN KEY (ingredient) REFERENCES warehouses(ingredient)
 );
@@ -49,7 +50,7 @@ CREATE TABLE orders (
     order_id INT AUTO_INCREMENT,
     delivery_day DATE,
     delivery_time TIME,
-    successfully_delivered INT NOT NULL,
+    successfully_delivered INT NOT NULL DEFAULT (0),
     customer_name TEXT,
     product_name TEXT,
     PRIMARY KEY (order_id),
