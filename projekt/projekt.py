@@ -162,14 +162,17 @@ def get_cookie_names():
     c = db.cursor()
     c.execute(
         """
-        SELECT product_name, count() AS nbr_of_pallets
-        FROM recipes LEFT JOIN pallets USING (product_name)
-        GROUP BY product_name 
-        HAVING product_name IN (
-            SELECT pallet_nbr 
-            FROM pallets 
-            WHERE blocked = 0
+        WITH unblocked_pallets AS (
+            SELECT      product_name, count()
+            FROM        recipes
+            LEFT JOIN   pallets USING (product_name)
+            WHERE       blocked = 0
+            GROUP BY    product_name
         )
+        SELECT      product_name, count() AS nbr_of_pallets
+        FROM        recipes
+        LEFT JOIN   unblocked_pallets USING (product_name)
+        GROUP BY    product_name
         """
     )
     found = [{ "name": product_name, "pallets": nbr_of_pallets} for product_name, nbr_of_pallets  in c]
@@ -198,70 +201,29 @@ def get_cookie_recipe(cookie_name):
 #---------- Add and check pallets ----------
 @post('/pallets')
 def post_pallet():
+
     new_pallet = request.json
     c = db.cursor()
-    cookie_name = new_pallet.get('cookie')
-
-    if not cookie_name or 'cookie' not in cookie_name:
-        response.status = 400
-        return {"error": "Cookie name is required."}
 
     try:
-        #db.execute("BEGIN")
-
-        #Check if there is enough ingredients for the cookie 
         c.execute(
             """
-            SELECT r.ingredient, (w.amount - r.amount) AS remaining_amount
-            FROM recipe_quantities r
-            JOIN warehouses w ON r.ingredient = w.ingredient
-            WHERE r.product_name = ?
-            HAVING remaining_amount < 0
-            """, (cookie_name,)
-        )
-        insufficient_ingredients = c.fetchall()
-    
-        if insufficient_ingredients:
-            response.status = 422
-            return {"error": "Insufficient ingredients for this cookie.", "details": insufficient_ingredients}
-    
-        #Deduct the amount needed for the cookies from the warehouse
-        c.execute(
-            """
-            UPDATE warehouses
-            SET amount = amount - (
-                SELECT amount
-                FROM recipe_quantities
-                WHERE product_name = ?
-                AND ingredient = warehouses.ingredient
-            )
-            WHERE ingredient IN (
-                SELECT ingredient
-                FROM recipe_quantities
-                WHERE product_name = ?
-            )
-            """, (cookie_name, cookie_name)
+            INSERT 
+            INTO pallets (production_date, product_name)
+            VALUES (DATETIME('now'), ?)
+            RETURNING pallet_nbr
+            """, [new_pallet['cookie']]
         )
 
-        #Create new pallet with timestamp
-        c.execute(
-            """
-            INSERT INTO pallets (production_date, production_time, blocked, product_name)
-            VALUES (DATE('now'), TIME('now'), 0, ?)
-            """, [cookie_name]
-        )
-
-        db.commit()
+        found = c.fetchone()
         response.status = 201
-        pallet_id = c.lastrowid
-        return {"message": "Pallet added successfully", "pallet_id": pallet_id}
 
-    except sqlite3.Error as e:
-        db.rollback()
-        response.status = 500
-        return {"error": str(e)}
+        return { 'location': f'/pallets/' + found[0]}
+
+    except:
+        response.status = 422
+        return {'location': ''}
         
-# ---- Kladd! Ej klar alls!! /J
 @get('/pallets')
 def get_pallets(): 
 

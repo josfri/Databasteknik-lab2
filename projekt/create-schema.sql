@@ -17,14 +17,15 @@ DROP TRIGGER IF EXISTS new_cookie;
 
 PRAGMA foreign_keys = ON;
 
--- Frågan är om det ska vara decimaler eller inte i siffrorna, dvs om det ska vara INT eller DECIMAL
 CREATE TABLE warehouses (
     ingredient TEXT,
-    amount DECIMAL NOT NULL DEFAULT (0),
+    amount INT NOT NULL DEFAULT (0),
     unit TEXT,
     last_delivery_time DATETIME,
     last_delivery_amount INT,
     PRIMARY KEY (ingredient)
+    CONSTRAINT non_negative CHECK (amount >= 0)
+                            ON CONFLICT ROLLBACK
 );
 
 CREATE TABLE recipes (
@@ -61,9 +62,8 @@ CREATE TABLE orders (
 
 CREATE TABLE pallets (
     pallet_nbr INT AUTO_INCREMENT,
-    production_date DATE NOT NULL,
-    production_time TIME NOT NULL,
-    blocked INT NOT NULL,
+    production_date DATETIME,
+    blocked INT NOT NULL DEFAULT (0),
     product_name TEXT,
     order_id INT,
     PRIMARY KEY (pallet_nbr),
@@ -87,4 +87,22 @@ BEGIN
     INSERT
     INTO recipes(product_name)
     VALUES (NEW.product_name);
+END;
+
+CREATE TRIGGER new_pallet
+    BEFORE INSERT
+    ON pallets
+BEGIN
+    UPDATE warehouses
+    SET amount = amount - 54 * (
+        SELECT amount
+        FROM recipe_quantities
+        WHERE product_name = NEW.product_name
+            AND ingredient = warehouses.ingredient
+    )
+    WHERE ingredient IN (
+        SELECT ingredient
+        FROM recipe_quantities
+        WHERE product_name = NEW.product_name
+    );
 END;
