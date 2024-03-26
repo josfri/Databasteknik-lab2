@@ -209,6 +209,7 @@ def check_all():
             payload = {"quantity": quantity, "deliveryTime": "2021-03-19 10:30:00"}
             r = requests.post(url(f"/ingredients/{quote(ingredient_name)}/deliveries"), json=payload)
             require(r.status_code, 201, "Wrong status code from POST on /ingredients/.../deliveries")
+            
         ok()
 
         testing("add/get cookies")

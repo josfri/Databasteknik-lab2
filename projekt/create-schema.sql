@@ -13,6 +13,7 @@ DROP TABLE IF EXISTS customers;
 DROP TABLE IF EXISTS orders;
 DROP TABLE IF EXISTS pallets;
 DROP TABLE IF EXISTS order_items;
+DROP TRIGGER IF EXISTS new_cookie;
 
 PRAGMA foreign_keys = ON;
 
@@ -78,3 +79,12 @@ CREATE TABLE order_items (
     FOREIGN KEY (pallet_nbr) REFERENCES pallets(pallet_nbr)
 );
 
+CREATE TRIGGER new_cookie
+    AFTER INSERT
+    ON recipe_quantities
+    WHEN NEW.product_name NOT IN recipes
+BEGIN
+    INSERT
+    INTO recipes(product_name)
+    VALUES (NEW.product_name);
+END;

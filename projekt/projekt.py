@@ -144,13 +144,14 @@ def get_ingredients():
 def add_cookies():
     new_cookie = request.json 
     c = db.cursor()
-    for recipeline in new_cookie['recipe'] :
+    for recipeline in new_cookie['recipe']:
         c.execute(
             """
             INSERT 
             INTO recipe_quantities(product_name, ingredient, amount)
             VALUES (?, ?, ?)
-            """, [new_cookie['name'], recipeline['ingredient'], recipeline['amount']]
+            """, 
+            [new_cookie['name'], recipeline['ingredient'], recipeline['amount']]
         )
     response.status = 201 
     url_cookie_name = quote(new_cookie['name'])
@@ -167,7 +168,7 @@ def get_cookie_names():
         HAVING product_name IN (
             SELECT pallet_nbr 
             FROM pallets 
-            WHERE blocked = False
+            WHERE blocked = 0
         )
         """
     )
@@ -303,7 +304,7 @@ def post_cookies_block(cookie_name):
 
     query = """
             UPDATE pallets
-            SET is_blocked = True
+            SET is_blocked = 1
             WHERE product_name = ?
             """
     
@@ -328,7 +329,7 @@ def post_cookies_unblock(cookie_name):
 
     query = """
             UPDATE pallets
-            SET is_blocked = False
+            SET is_blocked = 0
             WHERE product_name = ?
             """
     
