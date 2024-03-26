@@ -212,7 +212,7 @@ def check_all():
             
         ok()
 
-        testing("add/get cookies")
+        testing("add/get cookies") 
         resource = url("/cookies")
         for cookie in COOKIE_INPUT:
             payload = cookie

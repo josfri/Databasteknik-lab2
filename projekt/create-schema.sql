@@ -24,8 +24,6 @@ CREATE TABLE warehouses (
     last_delivery_time DATETIME,
     last_delivery_amount INT,
     PRIMARY KEY (ingredient)
-    CONSTRAINT non_negative CHECK (amount >= 0)
-                            ON CONFLICT ROLLBACK
 );
 
 CREATE TABLE recipes (
